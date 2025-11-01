@@ -1,5 +1,14 @@
 import ollama from 'ollama';
 
+/**
+ * @param {any} res
+ */
+function _extractTokenUsage(res) {
+  const prompt = res?.prompt_eval_count ?? 0;
+  const completion = res?.eval_count ?? 0;
+  return prompt + completion;
+}
+
 export default class CodeController {
   /**
    * @param {MojoContext} ctx
@@ -25,6 +34,8 @@ export default class CodeController {
       },
     });
 
+    const tokens = _extractTokenUsage(res);
+
     const { username } = await ctx.session();
 
     const user = await ctx.app.prisma.users.findUnique({
@@ -38,9 +49,9 @@ export default class CodeController {
         userId: user?.id,
         code: code,
         title: 'New Review',
+        tokens: Number(tokens),
       },
     });
-
 
     await ctx.app.prisma.review_messages.create({
       data: {
@@ -114,6 +125,13 @@ export default class CodeController {
       options: {
         temperature: 0,
       },
+    });
+
+    const tokens = _extractTokenUsage(res);
+
+    await ctx.app.prisma.reviews.update({
+      where: { id: Number(reviewId) },
+      data: { tokens: Number(tokens) + Number(review.tokens) },
     });
 
     await ctx.app.prisma.review_messages.create({

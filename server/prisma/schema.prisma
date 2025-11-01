@@ -48,6 +48,7 @@ model reviews {
   userId    Int?
   user      users?   @relation(fields: [userId], references: [id], onDelete: SetNull)
   title     String?
+  tokens    Int      @default(0)
   createdAt DateTime @default(now())
 
   messages review_messages[]

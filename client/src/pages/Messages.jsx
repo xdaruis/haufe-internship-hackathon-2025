@@ -8,6 +8,7 @@ export default function ReviewMessagesPage() {
 
   const [messages, setMessages] = useState([]);
   const [reviewCode, setReviewCode] = useState('');
+  const [tokens, setTokens] = useState(0);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState('');
 
@@ -27,18 +28,24 @@ export default function ReviewMessagesPage() {
     setLoading(true);
     setErr('');
     try {
-      const { data } = await axios.get(`/api/code/review/${encodeURIComponent(reviewId)}`);
-      setMessages(Array.isArray(data?.reviewMessages) ? data.reviewMessages : []);
+      const { data } = await axios.get(
+        `/api/code/review/${encodeURIComponent(reviewId)}`,
+      );
+      setMessages(
+        Array.isArray(data?.reviewMessages) ? data.reviewMessages : [],
+      );
 
       // Try to pull code if the API includes it
       const inlineCode = data?.review?.code ?? data?.code;
-      // alert(JSON.stringify(inlineCode));
+      setTokens(data?.review?.tokens ?? 0);
       if (typeof inlineCode === 'string') {
         setReviewCode(inlineCode);
       } else {
         // Optional fallback to a meta endpoint if you add it on the server
         try {
-          const meta = await axios.get(`/api/code/review/${encodeURIComponent(reviewId)}/meta`);
+          const meta = await axios.get(
+            `/api/code/review/${encodeURIComponent(reviewId)}/meta`,
+          );
           const c = meta?.data?.review?.code ?? meta?.data?.code;
           if (typeof c === 'string') setReviewCode(c);
         } catch {
@@ -46,7 +53,9 @@ export default function ReviewMessagesPage() {
         }
       }
     } catch (e) {
-      setErr(e?.response?.data?.error || e?.message || 'Failed to load messages.');
+      setErr(
+        e?.response?.data?.error || e?.message || 'Failed to load messages.',
+      );
     } finally {
       setLoading(false);
     }
@@ -113,7 +122,9 @@ export default function ReviewMessagesPage() {
       setInput('');
       await fetchMessages();
     } catch (e2) {
-      setErr(e2?.response?.data?.error || e2?.message || 'Failed to send message.');
+      setErr(
+        e2?.response?.data?.error || e2?.message || 'Failed to send message.',
+      );
       setMessages((prev) => prev.filter((m) => m.id !== tempId));
     } finally {
       setSending(false);
@@ -130,7 +141,9 @@ export default function ReviewMessagesPage() {
           >
             ← Back
           </button>
-          <h1 className="text-base font-semibold text-gray-900">Conversation #{reviewId}</h1>
+          <h1 className="text-base font-semibold text-gray-900">
+            Conversation #{reviewId}
+          </h1>
           <button
             onClick={fetchMessages}
             className="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-500"
@@ -173,8 +186,10 @@ export default function ReviewMessagesPage() {
                   className={[
                     'max-w-[80%] rounded-lg px-3 py-2 shadow-sm',
                     m.role === 'CLIENT' && 'bg-indigo-600 text-white',
-                    m.role === 'ASSISTANT' && 'bg-white ring-1 ring-gray-200 text-gray-900',
-                    m.role === 'SYSTEM' && 'bg-yellow-50 text-yellow-900 ring-1 ring-yellow-200',
+                    m.role === 'ASSISTANT' &&
+                      'bg-white ring-1 ring-gray-200 text-gray-900',
+                    m.role === 'SYSTEM' &&
+                      'bg-yellow-50 text-yellow-900 ring-1 ring-yellow-200',
                   ]
                     .filter(Boolean)
                     .join(' ')}
@@ -182,7 +197,9 @@ export default function ReviewMessagesPage() {
                   <div className="text-[10px] uppercase tracking-wide opacity-70 mb-1">
                     {m.role}
                   </div>
-                  <div className="whitespace-pre-wrap break-words text-sm">{m.body}</div>
+                  <div className="whitespace-pre-wrap break-words text-sm">
+                    {m.body}
+                  </div>
                   {m.createdAt ? (
                     <div className="mt-1 text-[10px] opacity-60">
                       {new Date(m.createdAt).toLocaleString()}
@@ -202,7 +219,10 @@ export default function ReviewMessagesPage() {
 
       {/* Chatbox */}
       <footer className="border-t border-gray-200 bg-white">
-        <form onSubmit={onSend} className="mx-auto max-w-3xl px-4 py-3 space-y-2">
+        <form
+          onSubmit={onSend}
+          className="mx-auto max-w-3xl px-4 py-3 space-y-2"
+        >
           <div className="flex gap-2">
             <select
               value={model}
@@ -212,7 +232,9 @@ export default function ReviewMessagesPage() {
               aria-label="Model"
             >
               {modelOptions.map((m) => (
-                <option key={m} value={m}>{m}</option>
+                <option key={m} value={m}>
+                  {m}
+                </option>
               ))}
             </select>
           </div>
@@ -234,6 +256,7 @@ export default function ReviewMessagesPage() {
               {sending ? 'Sending…' : 'Send'}
             </button>
           </div>
+          <div className="text-sm text-gray-500">Tokens used: {tokens}</div>
         </form>
       </footer>
     </div>
