@@ -38,7 +38,7 @@ export default class UserController {
       });
     }
 
-    const session = await UserHelper.setSession(ctx, user.username);
+    const session = await UserHelper.setSession(ctx, user.username, user.role);
 
     return ctx.render({ json: { session } });
   }
@@ -79,7 +79,7 @@ export default class UserController {
         },
       });
 
-      const session = await UserHelper.setSession(ctx, username);
+      const session = await UserHelper.setSession(ctx, username, 'USER');
 
       return ctx.render({ json: { session } });
     } catch (error) {
