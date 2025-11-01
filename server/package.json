@@ -1,0 +1,28 @@
+{
+  "name": "server",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "license": "AGPL-3.0-or-later",
+  "dependencies": {
+    "@mojojs/core": "^1.26.9",
+    "@prisma/client": "^6.3.1",
+    "axios": "^1.7.9",
+    "bcrypt": "^6.0.0",
+    "ollama": "^0.6.2"
+  },
+  "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^5.2.0",
+    "@types/node": "^22.10.7",
+    "nodemon": "^3.0.0",
+    "prettier": "^3.4.2",
+    "prisma": "^6.3.1",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "format": "prettier --write .",
+    "dev": "npx nodemon index.js server -l http://*:8080",
+    "start": "NODE_ENV=production node index.js server -l http://*:8080",
+    "tsc": "tsc --noEmit"
+  }
+}

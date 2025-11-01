@@ -1,0 +1,63 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum MessageRole {
+  CLIENT
+  ASSISTANT
+  SYSTEM
+}
+
+model prompts {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  prompt    String
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+}
+
+model llm_models {
+  id        Int      @id @default(autoincrement())
+  name      String
+  model     String   @unique
+  createdAt DateTime @default(now())
+}
+
+model users {
+  id        Int       @id @default(autoincrement())
+  username  String    @unique
+  password  String
+  role      Role      @default(USER)
+  createdAt DateTime  @default(now())
+  reviews   reviews[]
+}
+
+model reviews {
+  id        Int      @id @default(autoincrement())
+  userId    Int?
+  user      users?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  title     String?
+  createdAt DateTime @default(now())
+
+  messages review_messages[]
+}
+
+model review_messages {
+  id       Int     @id @default(autoincrement())
+  reviewId Int
+  review   reviews @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  role      MessageRole @default(CLIENT)
+  body      String
+  createdAt DateTime    @default(now())
+}
