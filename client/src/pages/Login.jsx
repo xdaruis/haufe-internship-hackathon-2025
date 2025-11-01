@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom'; 
+import { useNavigate } from 'react-router-dom';
+
 import { login } from '../features/user';
 
 export default function LoginPage() {
@@ -46,11 +47,15 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center
-    justify-center px-4">
+    <div
+      className="min-h-screen bg-gray-50 flex items-center
+    justify-center px-4"
+    >
       <div className="w-full max-w-md">
-        <div className="bg-white shadow-sm ring-1 ring-gray-200
-        rounded-xl p-6 sm:p-8">
+        <div
+          className="bg-white shadow-sm ring-1 ring-gray-200
+        rounded-xl p-6 sm:p-8"
+        >
           <h1 className="text-2xl font-semibold text-gray-900 mb-6">
             Log in to your account
           </h1>

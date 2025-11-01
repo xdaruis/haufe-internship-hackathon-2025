@@ -5,20 +5,7 @@ export default class CodeController {
    * @param {MojoContext} ctx
    */
   async onNewReview(ctx) {
-    const {code, model, prompt} = await ctx.req.json();
-    console.log(code, model, prompt);
-
-    // const code =
-    //   /** @type {any} */ (payload)?.code ||
-    //   '#include <stdio.h>\n\nint main(){\nprintf("Hello, World!\\n");\nreturn 0;\n}';
-
-    // const system = [
-    //   'You are a code formatter.',
-    //   'Reformat the provided code for readability and consistent style.',
-    //   'Do not change behavior or meaning.',
-    //   'Do not rename, reorder logic, introduce new code, or add comments.',
-    //   'Output ONLY the fully formatted code as plain text. No markdown fences, no explanations.',
-    // ].join('\n');
+    const { code, model, prompt } = await ctx.req.json();
 
     if (!(await ctx.app.prisma.llm_models.findUnique({ where: { model } }))) {
       return ctx.render({
@@ -49,7 +36,17 @@ export default class CodeController {
     const review = await ctx.app.prisma.reviews.create({
       data: {
         userId: user?.id,
+        code: code,
         title: 'New Review',
+      },
+    });
+
+
+    await ctx.app.prisma.review_messages.create({
+      data: {
+        reviewId: review?.id,
+        role: 'CLIENT',
+        body: prompt,
       },
     });
 
@@ -62,6 +59,80 @@ export default class CodeController {
     });
 
     return ctx.render({ json: { reviewId: review?.id } });
+  }
+
+  /**
+   * @param {MojoContext} ctx
+   */
+  async onFollowUpReview(ctx) {
+    const { reviewId, model, prompt } = await ctx.req.json();
+
+    console.log(reviewId, model, prompt);
+
+    const review = await ctx.app.prisma.reviews.findUnique({
+      where: { id: Number(reviewId) },
+    });
+
+    if (!review) {
+      return ctx.render({ json: { error: 'Review not found' }, status: 400 });
+    }
+
+    const conversationHistory = await ctx.app.prisma.review_messages.findMany({
+      where: { reviewId: Number(reviewId) },
+    });
+
+    const conversationHistoryString = conversationHistory
+      .filter((message) => message.role !== 'SYSTEM')
+      .map((message) => `<${message.role}> ${message.body} </${message.role}>`)
+      .join('\n');
+
+    if (!(await ctx.app.prisma.llm_models.findUnique({ where: { model } }))) {
+      return ctx.render({
+        json: { error: 'Model not found' },
+        status: 400,
+      });
+    }
+
+    const systemPrompt = [
+      'Here is what was discussed before:',
+      '<conversation_history>',
+      conversationHistoryString,
+      '</conversation_history>',
+
+      'Here is your new task:',
+      '<CRITICAL_TASK>',
+      prompt,
+      '</CRITICAL_TASK>',
+    ].join('\n');
+
+    const res = await ollama.chat({
+      model: model,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: review.code },
+      ],
+      options: {
+        temperature: 0,
+      },
+    });
+
+    await ctx.app.prisma.review_messages.create({
+      data: {
+        reviewId: Number(reviewId),
+        role: 'CLIENT',
+        body: prompt,
+      },
+    });
+
+    await ctx.app.prisma.review_messages.create({
+      data: {
+        reviewId: Number(reviewId),
+        role: 'ASSISTANT',
+        body: res?.message?.content ?? 'Error formatting code',
+      },
+    });
+
+    return ctx.render({ json: { success: true } });
   }
 
   /**
@@ -135,9 +206,12 @@ export default class CodeController {
         status: 400,
       });
     }
+    const review = await ctx.app.prisma.reviews.findUnique({
+      where: { id: Number(reviewId) },
+    });
     const reviewMessages = await ctx.app.prisma.review_messages.findMany({
       where: { reviewId: Number(reviewId) },
     });
-    return ctx.render({ json: { reviewMessages } });
+    return ctx.render({ json: { reviewMessages, review } });
   }
 }

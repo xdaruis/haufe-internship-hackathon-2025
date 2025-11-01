@@ -3,15 +3,14 @@ import { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 
-
 import { login, logout } from './features/user';
+import HistoryPage from './pages/History';
 import LoginPage from './pages/Login';
-import RegisterPage from './pages/Register';
 import MessagesPage from './pages/Messages';
-import NewReviewPage from './pages/NewReview';
 import NewModelPage from './pages/NewModel';
 import NewPromptPage from './pages/NewPrompt';
-import HistoryPage from './pages/History';
+import NewReviewPage from './pages/NewReview';
+import RegisterPage from './pages/Register';
 
 const router = createBrowserRouter([
   {

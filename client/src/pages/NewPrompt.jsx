@@ -1,6 +1,6 @@
+import axios from 'axios';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 
 export default function NewPromptPage() {
   const navigate = useNavigate();
@@ -23,7 +23,7 @@ export default function NewPromptPage() {
         'Reformat the provided code for readability and consistent style.',
         'Do not change behavior or meaning.',
         'Do not rename, reorder logic, introduce new code, or add comments.',
-        'Output ONLY the fully formatted code as plain text. No markdown fences, no explanations.'
+        'Output ONLY the fully formatted code as plain text. No markdown fences, no explanations.',
       ].join('\n'),
     }));
   };
@@ -73,20 +73,29 @@ export default function NewPromptPage() {
         </div>
 
         {error ? (
-          <div role="alert" className="mb-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          <div
+            role="alert"
+            className="mb-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+          >
             {error}
           </div>
         ) : null}
 
         {ok ? (
-          <div role="status" className="mb-4 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+          <div
+            role="status"
+            className="mb-4 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700"
+          >
             Prompt created.
           </div>
         ) : null}
 
         <form onSubmit={onSubmit} className="space-y-5">
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="name"
+              className="block text-sm font-medium text-gray-700"
+            >
               Name (unique)
             </label>
             <input
@@ -101,7 +110,10 @@ export default function NewPromptPage() {
           </div>
 
           <div>
-            <label htmlFor="prompt" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="prompt"
+              className="block text-sm font-medium text-gray-700"
+            >
               Prompt
             </label>
             <textarea

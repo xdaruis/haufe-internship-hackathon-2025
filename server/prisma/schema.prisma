@@ -44,6 +44,7 @@ model users {
 
 model reviews {
   id        Int      @id @default(autoincrement())
+  code      String?
   userId    Int?
   user      users?   @relation(fields: [userId], references: [id], onDelete: SetNull)
   title     String?

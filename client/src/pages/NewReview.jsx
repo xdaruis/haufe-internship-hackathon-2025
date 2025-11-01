@@ -1,6 +1,6 @@
+import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 
 export default function NewReviewPage() {
   const navigate = useNavigate();
@@ -53,7 +53,7 @@ export default function NewReviewPage() {
       try {
         const { data } = await axios.get('/api/code/prompts'); // expected: { prompts: [{id,name,prompt}, ...] }
         const serverItems = Array.isArray(data?.prompts || data?.presets)
-          ? (data.prompts || data.presets)
+          ? data.prompts || data.presets
           : [];
         const normalized = serverItems
           .map((p) => ({
@@ -63,11 +63,22 @@ export default function NewReviewPage() {
           }))
           .filter((p) => p.id && p.name && p.prompt);
 
-        const localDefault = { id: '__format_only__', name: 'Formatting-only (local)', prompt: formattingPreset };
+        const localDefault = {
+          id: '__format_only__',
+          name: 'Formatting-only (local)',
+          prompt: formattingPreset,
+        };
 
         if (mounted) setPresets([localDefault, ...normalized]);
       } catch {
-        if (mounted) setPresets([{ id: '__format_only__', name: 'Formatting-only (local)', prompt: formattingPreset }]);
+        if (mounted)
+          setPresets([
+            {
+              id: '__format_only__',
+              name: 'Formatting-only (local)',
+              prompt: formattingPreset,
+            },
+          ]);
       }
     })();
 
@@ -93,16 +104,28 @@ export default function NewReviewPage() {
 
     setSubmitting(true);
     try {
-      const { data } = await axios.post('/api/code/new-review', { model, prompt, code });
+      const { data } = await axios.post('/api/code/new-review', {
+        model,
+        prompt,
+        code,
+      });
 
-      const reviewId = data?.reviewId ?? data?.id ?? data?.review?.id ?? data?.conversationId ?? null;
+      const reviewId =
+        data?.reviewId ??
+        data?.id ??
+        data?.review?.id ??
+        data?.conversationId ??
+        null;
       if (reviewId) {
         navigate(`/chat/${encodeURIComponent(reviewId)}`);
       } else {
         alert('Review created successfully.');
       }
     } catch (err) {
-      const msg = err?.response?.data?.error || err?.message || 'Failed to create review.';
+      const msg =
+        err?.response?.data?.error ||
+        err?.message ||
+        'Failed to create review.';
       setError(msg);
     } finally {
       setSubmitting(false);
@@ -117,7 +140,10 @@ export default function NewReviewPage() {
         </div>
 
         {error ? (
-          <div role="alert" className="mb-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          <div
+            role="alert"
+            className="mb-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+          >
             {error}
           </div>
         ) : null}
@@ -126,7 +152,9 @@ export default function NewReviewPage() {
           <div className="grid gap-4 md:grid-cols-3">
             <div className="md:col-span-1 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Model</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Model
+                </label>
                 <select
                   value={model}
                   onChange={(e) => setModel(e.target.value)}
@@ -139,11 +167,15 @@ export default function NewReviewPage() {
                     </option>
                   ))}
                 </select>
-                <p className="mt-1 text-xs text-gray-500">Local model via Ollama.</p>
+                <p className="mt-1 text-xs text-gray-500">
+                  Local model via Ollama.
+                </p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">Preset</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Preset
+                </label>
                 <select
                   value={presetKey}
                   onChange={(e) => onSelectPreset(e.target.value)}
@@ -157,12 +189,16 @@ export default function NewReviewPage() {
                     </option>
                   ))}
                 </select>
-                <p className="mt-1 text-xs text-gray-500">Choose a server-provided prompt or the local default.</p>
+                <p className="mt-1 text-xs text-gray-500">
+                  Choose a server-provided prompt or the local default.
+                </p>
               </div>
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700">Prompt</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Prompt
+              </label>
               <textarea
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
@@ -174,7 +210,10 @@ export default function NewReviewPage() {
               <div className="mt-1 flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => { setPresetKey(''); setPrompt(''); }}
+                  onClick={() => {
+                    setPresetKey('');
+                    setPrompt('');
+                  }}
                   className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50"
                 >
                   Clear
@@ -184,7 +223,9 @@ export default function NewReviewPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Code</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Code
+            </label>
             <textarea
               value={code}
               onChange={(e) => setCode(e.target.value)}
